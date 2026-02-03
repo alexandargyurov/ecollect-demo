@@ -254,8 +254,8 @@ function App() {
       <sippetai-voip-widget
         api-key={apiKey}
         sip-url="sip.sippet.ai"
-        sip-user="1001"
-        sip-password="1234"
+        sip-user="test-sip"
+        sip-password="supersecurepass"
         sip-web-socket-url="wss://sip.sippet.ai:7443"
         user-name="Agent"
         user-email="agent@example.com"
