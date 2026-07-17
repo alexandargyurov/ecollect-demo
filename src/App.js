@@ -1,267 +1,215 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import '@sippet-ai/client';
-import { getSocket, initSocket, sippet } from '@sippet-ai/client';
-import { listInboundNumbers } from '@sippet-ai/client/dist/lib/ash_rpc.js';
+import { useState } from 'react';
+import SdkDemo from './SdkDemo';
 import './App.css';
 
-const EVENT_NAMES = [
-  'incoming_call',
-  'call_answered',
-  'call_ended',
-  'operator_status_change',
+const WIDGET_AGENT_ID = '7bb8943f-db2a-4628-b65e-db6df7ca6ac1';
+const WIDGET_PUBLISHABLE_KEY = 'sippetai_hpWdiPjZr4ZFt5cdBMSsxRVxjs2qtuTehGRitZAFeMZ9Mgm2bloCOpe6Pe1LXBOWQ_cyhOr0'
+
+const invoiceItems = [
+  { description: 'Business platform plan', detail: '12 months · Jul 2026–Jun 2027', amount: '1,200.00 EUR' },
+  { description: 'Onboarding workshop', detail: 'One remote session', amount: '240.00 EUR' },
+  { description: 'Document processing', detail: '30 documents × 4.00 EUR', amount: '120.00 EUR' },
 ];
 
-function App() {
-  const [apiKey, setApiKey] = useState('');
-  const [status, setStatus] = useState('idle');
-  const [events, setEvents] = useState([]);
-  const [samples, setSamples] = useState([]);
-  const [initialized, setInitialized] = useState(false);
-  const [didNumbers, setDidNumbers] = useState([]);
-  const [didLoading, setDidLoading] = useState(false);
-  const [didError, setDidError] = useState('');
+const timeline = [
+  { label: 'Payment became overdue', date: '16 July 2026' },
+  { label: 'Payment reminder sent', date: '14 July 2026' },
+  { label: 'Invoice delivered', date: '1 July 2026' },
+];
 
-  useEffect(() => {
-    sippet.setApiKey(apiKey.trim());
-  }, [apiKey]);
+function InvoicePage() {
+  const [copied, setCopied] = useState('');
 
-  const eventCountLabel = useMemo(
-    () => `${events.length} event${events.length === 1 ? '' : 's'}`,
-    [events.length],
-  );
-
-  const addEvent = useCallback((name, payload) => {
-    setEvents(prev => {
-      const next = [
-        {
-          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-          name,
-          payload,
-          receivedAt: new Date().toLocaleTimeString(),
-        },
-        ...prev,
-      ];
-      return next.slice(0, 50);
-    });
-  }, []);
-
-  const addSample = useCallback((name, payload) => {
-    setSamples(prev => {
-      const next = [
-        {
-          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-          name,
-          payload,
-          receivedAt: new Date().toLocaleTimeString(),
-        },
-        ...prev,
-      ];
-      return next.slice(0, 10);
-    });
-  }, []);
-
-  const connectRealtime = useCallback(() => {
-    if (initialized) return;
-    const key = apiKey.trim();
-    if (!key) {
-      addSample('config_error', { message: 'API key is required.' });
-      return;
-    }
-
-    let socket;
+  const copyValue = async (label, value) => {
     try {
-      socket = getSocket();
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      window.setTimeout(() => setCopied(''), 1800);
     } catch (_error) {
-      socket = initSocket({ publishableKey: key });
+      setCopied('Copy unavailable');
     }
+  };
 
-    socket.onOpen(() => setStatus('connected'));
-    socket.onClose(() => setStatus('closed'));
-    socket.onError(() => setStatus('error'));
-
-    const channel = socket.channel('events');
-    channel
-      .join()
-      .receive('ok', () => setStatus('joined'))
-      .receive('error', () => setStatus('join error'))
-      .receive('timeout', () => setStatus('join timeout'));
-
-    EVENT_NAMES.forEach(eventName => {
-      channel.on(eventName, payload => addEvent(eventName, payload));
-    });
-
-    setInitialized(true);
-  }, [addEvent, addSample, apiKey, initialized]);
-
-  const handleClearEvents = useCallback(() => setEvents([]), []);
-  const handleClearSamples = useCallback(() => setSamples([]), []);
-
-  const handleGetQueue = useCallback(async () => {
-    try {
-      const result = await sippet.getQueue();
-      addSample('queue', result);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      addSample('queue_error', { message });
-    }
-  }, [addSample]);
-
-  const handleLoadDidNumbers = useCallback(async () => {
-    const key = apiKey.trim();
-    if (!key) {
-      setDidError('API key is required.');
-      return;
-    }
-    setDidLoading(true);
-    setDidError('');
-    try {
-      const result = await listInboundNumbers({
-        fields: ['id', 'phoneE164', 'label'],
-        headers: { 'x-api-key': key },
-      });
-      if (!result.success) {
-        setDidError('Failed to load DID numbers.');
-        setDidNumbers([]);
-        return;
-      }
-      const data = Array.isArray(result.data?.results)
-        ? result.data.results
-        : Array.isArray(result.data)
-        ? result.data
-        : [];
-      setDidNumbers(data);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      setDidError(message);
-      setDidNumbers([]);
-    } finally {
-      setDidLoading(false);
-    }
-  }, [apiKey]);
-
-  const handleGetActiveCalls = useCallback(async () => {
-    try {
-      const result = await sippet.getActiveCalls();
-      addSample('active_calls', result);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      addSample('active_calls_error', { message });
-    }
-  }, [addSample]);
+  const downloadInvoice = () => {
+    const content = [
+      'eCollect — INVOICE INV-2026-0712',
+      'Status: Unpaid',
+      'Customer: Alpine Studio GmbH',
+      'Supplier: eCollect Demo Europe B.V.',
+      'Invoice date: 1 July 2026',
+      'Due date: 15 July 2026',
+      '',
+      ...invoiceItems.map(item => `${item.description}: ${item.amount}`),
+      'VAT 20%: 312.00 EUR',
+      'Total: 1,872.00 EUR',
+    ].join('\n');
+    const url = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'invoice-INV-2026-0712.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="app">
-      <header className="app__header">
-        <div>
-          <h1>Sippet AI Demo</h1>
-          <p>Realtime events + queue/active calls from the SDK.</p>
+    <div className="site-shell">
+      <header className="hero">
+        <nav className="nav" aria-label="Primary navigation">
+          <a className="brand" href="#invoice" aria-label="eCollect invoice home">
+            <BrandMark />
+            <span>eCollect</span>
+          </a>
+          <button className="language-button" type="button" aria-label="Change language">
+            <GlobeIcon />
+            <span>EN</span>
+          </button>
+        </nav>
+        <div className="hero__copy">
+          <span className="eyebrow">Customer portal</span>
+          <h1>Your invoice is due</h1>
+          <p>Please use the payment details below.</p>
         </div>
-        <div className="app__status">Status: {status}</div>
+        <div className="hero__ribbon hero__ribbon--one" aria-hidden="true" />
+        <div className="hero__ribbon hero__ribbon--two" aria-hidden="true" />
       </header>
 
-      <section className="panel">
-        <label className="field">
-          <span>Publishable API key</span>
-          <input
-            type="password"
-            placeholder="sippetai_..."
-            value={apiKey}
-            onChange={event => setApiKey(event.target.value)}
-          />
-        </label>
-        <div className="actions">
-          <button type="button" onClick={connectRealtime} disabled={initialized}>
-            {initialized ? 'Realtime connected' : 'Connect realtime'}
-          </button>
-          <button type="button" onClick={handleGetActiveCalls}>
-            Fetch active calls
-          </button>
-          <button type="button" onClick={handleGetQueue}>
-            Fetch queue
-          </button>
-          <button type="button" className="ghost" onClick={handleClearSamples}>
-            Clear responses
-          </button>
-          <button type="button" className="ghost" onClick={handleClearEvents}>
-            Clear events
-          </button>
-        </div>
-      </section>
+      <main className="invoice-page" id="invoice">
+        <section className="invoice-card invoice-card--summary" aria-labelledby="invoice-heading">
+          <div className="summary__topline">
+            <div>
+              <span className="section-kicker">Invoice</span>
+              <h2 id="invoice-heading">INV-2026-0712</h2>
+            </div>
+            <span className="status"><ClockIcon /> Unpaid</span>
+          </div>
+          <div className="summary__grid">
+            <div className="summary__amount">
+              <span>Amount due</span>
+              <strong>1,872.00 <small>EUR</small></strong>
+            </div>
+            <dl className="details-list">
+              <div><dt>Customer</dt><dd>Alpine Studio GmbH</dd></div>
+              <div><dt>Invoice date</dt><dd>1 July 2026</dd></div>
+              <div><dt>Due date</dt><dd>15 July 2026</dd></div>
+              <div><dt>Invoice stage</dt><dd>Reminder sent</dd></div>
+            </dl>
+          </div>
+        </section>
 
-      <section className="panel">
-        <div className="did__header">
-          <h2>Your DID phone numbers</h2>
-          <button type="button" onClick={handleLoadDidNumbers} disabled={didLoading}>
-            {didLoading ? 'Loading…' : 'Load numbers'}
-          </button>
-        </div>
-        {didError ? <div className="did__error">{didError}</div> : null}
-        {didNumbers.length === 0 ? (
-          <div className="did__empty">No DID numbers loaded.</div>
-        ) : (
-          <ul className="did__list">
-            {didNumbers.map(number => (
-              <li key={number.id}>
-                <span>{number.phoneE164}</span>
-                {number.label ? <span className="did__label">{number.label}</span> : null}
+        <section className="invoice-card payment-card" aria-labelledby="payment-heading">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Payment details</span>
+              <h2 id="payment-heading">Bank transfer</h2>
+            </div>
+            {copied && <span className="copy-notice" role="status">{copied === 'Copy unavailable' ? copied : `${copied} copied`}</span>}
+          </div>
+          <dl className="payment-list">
+            <div><dt>Bank</dt><dd>Continental Demo Bank</dd></div>
+            <div>
+              <dt>Payment reference</dt>
+              <dd><span>RF18 5390 0754 7034</span><CopyButton label="Reference" onClick={() => copyValue('Reference', 'RF18539007547034')} /></dd>
+            </div>
+            <div>
+              <dt>IBAN</dt>
+              <dd><span>DE89 3704 0044 0532 0130 00</span><CopyButton label="IBAN" onClick={() => copyValue('IBAN', 'DE89370400440532013000')} /></dd>
+            </div>
+          </dl>
+        </section>
+
+        <section className="invoice-card line-items" aria-labelledby="specifications-heading">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Specifications</span>
+              <h2 id="specifications-heading">Invoice items</h2>
+            </div>
+          </div>
+          <div className="item-list">
+            {invoiceItems.map(item => (
+              <div className="item" key={item.description}>
+                <div><strong>{item.description}</strong><span>{item.detail}</span></div>
+                <span>{item.amount}</span>
+              </div>
+            ))}
+          </div>
+          <div className="totals">
+            <div><span>Subtotal</span><span>1,560.00 EUR</span></div>
+            <div><span>VAT 20%</span><span>312.00 EUR</span></div>
+            <div className="totals__grand"><strong>Total</strong><strong>1,872.00 EUR</strong></div>
+          </div>
+        </section>
+
+        <section className="invoice-card history" aria-labelledby="history-heading">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Activity</span>
+              <h2 id="history-heading">July 2026</h2>
+            </div>
+          </div>
+          <ol className="timeline">
+            {timeline.map((event, index) => (
+              <li key={event.label} className={index === 0 ? 'timeline__item timeline__item--attention' : 'timeline__item'}>
+                <span className="timeline__dot" aria-hidden="true" />
+                <div><strong>{event.label}</strong><span>{event.date}</span></div>
+                {event.amount && <span className="timeline__amount">{event.amount}</span>}
               </li>
             ))}
-          </ul>
-        )}
-      </section>
+          </ol>
+        </section>
 
-      <section className="panel panel--split">
-        <div>
-          <h2>Realtime events</h2>
-          <div className="meta">{eventCountLabel}</div>
-          <div className="log">
-            {events.length === 0 ? (
-              <div className="log__empty">No events yet.</div>
-            ) : (
-              events.map(event => (
-                <div className="log__row" key={event.id}>
-                  <div className="log__header">
-                    <span>{event.name}</span>
-                    <span>{event.receivedAt}</span>
-                  </div>
-                  <pre>{JSON.stringify(event.payload, null, 2)}</pre>
-                </div>
-              ))
-            )}
-          </div>
+        <div className="invoice-actions">
+          <button type="button" onClick={downloadInvoice}><DownloadIcon />Download invoice</button>
+          <a href="mailto:accounts@example.com?subject=Invoice%20INV-2026-0712"><MailIcon />Email invoice</a>
         </div>
-        <div>
-          <h2>SDK responses</h2>
-          <div className="meta">{samples.length} samples</div>
-          <div className="log">
-            {samples.length === 0 ? (
-              <div className="log__empty">No responses yet.</div>
-            ) : (
-              samples.map(event => (
-                <div className="log__row" key={event.id}>
-                  <div className="log__header">
-                    <span>{event.name}</span>
-                    <span>{event.receivedAt}</span>
-                  </div>
-                  <pre>{JSON.stringify(event.payload, null, 2)}</pre>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
+        <p className="demo-note">Demo invoice — no real payment or customer data.</p>
+      </main>
 
-      <sippetai-voip-widget
-        api-key={apiKey}
-        sip-url="sip.sippet.ai"
-        sip-user="test-sip"
-        sip-password="supersecurepass"
-        sip-web-socket-url="wss://sip.sippet.ai:7443"
-        user-name="Agent"
-        user-email="agent@example.com"
-      ></sippetai-voip-widget>
+      <footer className="footer">
+        <div className="footer__brand"><BrandMark /><span>eCollect</span></div>
+        <p>Clear payments. Calm business.</p>
+        <nav aria-label="Footer navigation">
+          <a href="#invoice">Invoice</a>
+          <a href="/sdk-demo">SDK demo</a>
+          <a href="mailto:support@example.com">Support</a>
+          <a href="#invoice">Privacy</a>
+        </nav>
+        <small>Demo experience powered by Sippet AI</small>
+      </footer>
+
     </div>
   );
 }
+
+function App() {
+  const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+
+  return (
+    <>
+      {pathname === '/sdk-demo' ? <SdkDemo /> : <InvoicePage />}
+      <sippet-widget
+        agent-id={WIDGET_AGENT_ID}
+        {...(WIDGET_PUBLISHABLE_KEY ? { 'publishable-key': WIDGET_PUBLISHABLE_KEY } : {})}
+      ></sippet-widget>
+    </>
+  );
+}
+
+function CopyButton({ label, onClick }) {
+  return <button className="copy-button" type="button" onClick={onClick} aria-label={`Copy ${label}`}><CopyIcon /></button>;
+}
+
+function BrandMark() {
+  return <span className="brand-mark" aria-hidden="true"><span /></span>;
+}
+
+function Icon({ children }) {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+
+function GlobeIcon() { return <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18" /></Icon>; }
+function ClockIcon() { return <Icon><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Icon>; }
+function CopyIcon() { return <Icon><rect x="9" y="9" width="10" height="10" rx="2" /><path d="M15 9V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /></Icon>; }
+function DownloadIcon() { return <Icon><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16" /></Icon>; }
+function MailIcon() { return <Icon><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></Icon>; }
 
 export default App;

@@ -1,6 +1,19 @@
-# Getting Started with Create React App
+# Sippet AI demo
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This Create React App demo presents a fictional customer invoice and embeds the
+`@sippet-ai/widget` chat/voice launcher for agent
+`7bb8943f-db2a-4628-b65e-db6df7ca6ac1`, showing how support can sit directly
+inside a billing portal.
+
+## Widget configuration
+
+Copy `.env.example` to `.env.local` and set `REACT_APP_SIPPET_PUBLISHABLE_KEY`
+to a browser-safe Sippet publishable key. Never put a Sippet secret API key in
+this environment variable.
+
+The installed widget's ESM assets are copied into `public/sippet-widget` during
+install, start, and build so its lazy-loaded chat and voice chunks are served
+from the same directory.
 
 ## Available Scripts
 

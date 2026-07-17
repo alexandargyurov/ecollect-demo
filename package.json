@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@sippet-ai/client": "^0.0.11",
+    "@fontsource-variable/instrument-sans": "^5.2.8",
+    "@sippet-ai/sdk-js": "^0.0.14",
+    "@sippet-ai/widget": "^0.0.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -14,10 +16,14 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "postinstall": "npm run sync:widget",
+    "prestart": "npm run sync:widget",
     "start": "react-scripts start",
+    "prebuild": "npm run sync:widget",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "sync:widget": "node scripts/sync-sippet-widget.js"
   },
   "eslintConfig": {
     "extends": [
