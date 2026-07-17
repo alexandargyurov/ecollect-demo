@@ -2,7 +2,7 @@ import { useState } from 'react';
 import SdkDemo from './SdkDemo';
 import './App.css';
 
-const WIDGET_AGENT_ID = '7bb8943f-db2a-4628-b65e-db6df7ca6ac1';
+const WIDGET_AGENT_ID = '72fc884d-b7da-4697-8757-d9222bb14f17';
 const WIDGET_PUBLISHABLE_KEY = 'sippetai_hpWdiPjZr4ZFt5cdBMSsxRVxjs2qtuTehGRitZAFeMZ9Mgm2bloCOpe6Pe1LXBOWQ_cyhOr0'
 
 const invoiceItems = [
