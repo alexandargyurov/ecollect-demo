@@ -69,7 +69,7 @@ function SdkDemo() {
     let session;
     try {
       session = await mintRealtimeSession(key);
-      addSample('realtime_session', session);
+      addSample('realtime_session', { expiresAt: session.expiresAt });
     } catch (error) {
       addSample('realtime_token_error', { message: getErrorMessage(error) });
       setStatus('token error');
@@ -82,7 +82,7 @@ function SdkDemo() {
     try {
       socket = initSocket({
         baseUrl: SIPPET_BASE_URL,
-        socketOptions: { params: { session_token: session.token } },
+        socketOptions: { authToken: session.token },
       });
     } catch (error) {
       addSample('realtime_error', { message: getErrorMessage(error) });

@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@fontsource-variable/instrument-sans": "^5.2.8",
-    "@sippet-ai/sdk-js": "^0.0.14",
+    "@sippet-ai/sdk-js": "^0.0.20",
     "@sippet-ai/widget": "^0.0.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

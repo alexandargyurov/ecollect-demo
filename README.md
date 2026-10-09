@@ -5,6 +5,25 @@ This Create React App demo presents a fictional customer invoice and embeds the
 `7bb8943f-db2a-4628-b65e-db6df7ca6ac1`, showing how support can sit directly
 inside a billing portal.
 
+## Setup
+
+```sh
+npm install
+npm start
+```
+
+## Sippet packages
+
+- SDK: `@sippet-ai/sdk-js` 0.0.20.
+- Widget: `@sippet-ai/widget` 0.0.2, still the latest npm release as of 9 October 2026.
+  Newer upstream widget changes need a separate widget release; upgrading the
+  SDK does not replace the widget's prebuilt bundle.
+
+The SDK dashboard sends realtime session tokens through WebSocket `authToken`
+instead of URL query parameters and omits them from the response log. Its secret
+API key input is for local demos only; production integrations must mint tokens
+on a backend and keep secret keys out of the browser.
+
 ## Widget configuration
 
 Copy `.env.example` to `.env.local` and set `REACT_APP_SIPPET_PUBLISHABLE_KEY`
