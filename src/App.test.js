@@ -30,7 +30,7 @@ test('renders the unpaid demo invoice and Sippet widget', () => {
   expect(screen.getByRole('button', { name: /Download invoice/i })).toBeInTheDocument();
   expect(container.querySelector('sippet-widget')).toHaveAttribute(
     'agent-id',
-    '7bb8943f-db2a-4628-b65e-db6df7ca6ac1',
+    '72fc884d-b7da-4697-8757-d9222bb14f17',
   );
 });
 

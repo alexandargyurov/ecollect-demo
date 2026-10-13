@@ -6,6 +6,7 @@ import {
   joinEventsChannel,
 } from '@sippet-ai/sdk-js/client';
 import './SdkDemo.css';
+import { SIPPET_API_ORIGIN } from './sippet-config';
 
 const EVENT_NAMES = [
   'incoming_call',
@@ -13,7 +14,7 @@ const EVENT_NAMES = [
   'call_ended',
   'operator_status_change',
 ];
-const SIPPET_BASE_URL = 'https://api.sippet.ai';
+const SIPPET_BASE_URL = SIPPET_API_ORIGIN;
 const SIPPET_RPC_URL = `${SIPPET_BASE_URL}/rpc/public/run`;
 
 function SdkDemo() {

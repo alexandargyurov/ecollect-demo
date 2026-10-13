@@ -2,7 +2,7 @@
 
 This Create React App demo presents a fictional customer invoice and embeds the
 `@sippet-ai/widget` chat/voice launcher for agent
-`7bb8943f-db2a-4628-b65e-db6df7ca6ac1`, showing how support can sit directly
+`72fc884d-b7da-4697-8757-d9222bb14f17`, showing how support can sit directly
 inside a billing portal.
 
 ## Setup
@@ -15,7 +15,7 @@ npm start
 ## Sippet packages
 
 - SDK: `@sippet-ai/sdk-js` 0.0.20.
-- Widget: `@sippet-ai/widget` 0.0.2, still the latest npm release as of 9 October 2026.
+- Widget: `@sippet-ai/widget` 0.0.3.
   Newer upstream widget changes need a separate widget release; upgrading the
   SDK does not replace the widget's prebuilt bundle.
 
@@ -26,9 +26,10 @@ on a backend and keep secret keys out of the browser.
 
 ## Widget configuration
 
-Copy `.env.example` to `.env.local` and set `REACT_APP_SIPPET_PUBLISHABLE_KEY`
-to a browser-safe Sippet publishable key. Never put a Sippet secret API key in
-this environment variable.
+The demo defaults to the production Sippet API and eCollect agent. Set the
+`REACT_APP_SIPPET_*` variables from `.env.example` in your deployment environment
+to override these defaults. Use only a browser-safe publishable key for
+`REACT_APP_SIPPET_PUBLISHABLE_KEY`; never use a secret API key.
 
 The installed widget's ESM assets are copied into `public/sippet-widget` during
 install, start, and build so its lazy-loaded chat and voice chunks are served

@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import SdkDemo from './SdkDemo';
+import { SIPPET_API_ORIGIN, SIPPET_AGENT_ID, SIPPET_PUBLISHABLE_KEY } from './sippet-config';
 import './App.css';
-
-const WIDGET_AGENT_ID = '72fc884d-b7da-4697-8757-d9222bb14f17';
-const WIDGET_PUBLISHABLE_KEY = 'sippetai_hpWdiPjZr4ZFt5cdBMSsxRVxjs2qtuTehGRitZAFeMZ9Mgm2bloCOpe6Pe1LXBOWQ_cyhOr0'
 
 const invoiceItems = [
   { description: 'Business platform plan', detail: '12 months · Jul 2026–Jun 2027', amount: '1,200.00 EUR' },
@@ -187,8 +185,9 @@ function App() {
     <>
       {pathname === '/sdk-demo' ? <SdkDemo /> : <InvoicePage />}
       <sippet-widget
-        agent-id={WIDGET_AGENT_ID}
-        {...(WIDGET_PUBLISHABLE_KEY ? { 'publishable-key': WIDGET_PUBLISHABLE_KEY } : {})}
+        agent-id={SIPPET_AGENT_ID}
+        api-origin={SIPPET_API_ORIGIN}
+        {...(SIPPET_PUBLISHABLE_KEY ? { 'publishable-key': SIPPET_PUBLISHABLE_KEY } : {})}
       ></sippet-widget>
     </>
   );
